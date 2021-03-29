@@ -1,24 +1,21 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class Main {
+public class Main3 {
 
-    public static void main(String[] args) throws FileNotFoundException {
-       question1();
-       question2();
-    }
-
-    public static char ceasarChar(char c, int rot){
-        char a = (char) ((c - rot - 'A' + 26)  % 26 + 'A') ;
+    public static char ceasarChar(char c, int rot) {
+        char a = (char) ((c - rot - 'A' + 26) % 26 + 'A');
         return a;
     }
 
-    public static double absolute(double number){
-        if(number > 0){
+    public static String ceasarString(String word){
+        return "";
+    }
+
+    public static double absolute(double number) {
+        if (number > 0) {
             return number;
         }
         double number2 = 0;
@@ -29,14 +26,14 @@ public class Main {
     public static void question1() throws FileNotFoundException {
         File file = new File("cexercise1.txt");
         Scanner scanner = new Scanner(file);
-        int number = frequencyCompareQuestion1();
-        while(scanner.hasNext()){
+        int number = frequencyCompare(frequencyTess26(), frequencyExercise1());
+        while (scanner.hasNext()) {
             String content = scanner.nextLine();
-                String emptyWord = "";
-                for(int x = 0; x < content.length(); x++){
-                    emptyWord += ceasarChar(content.charAt(x), number);
-                }
-                System.out.println(emptyWord);
+            String word = "";
+            for (int x = 0; x < 30; x++) {
+                word += ceasarChar(content.charAt(x), number);
+            }
+            System.out.println(word);
         }
     }
 
@@ -48,84 +45,154 @@ public class Main {
         String word = "";
         char[] keyArray = new char[21];
 
-        for(int x = 0; x < 21; x++){
+        for (int x = 0; x < 21; x++) {
             keyArray[x] = (char) (key.charAt(x) - 'A');
         }
 
-        for(int i = 0; i < 21; i++){
-            word+= ceasarChar(content.charAt(i), keyArray[i%keyArray.length]);
+        for (int i = 0; i < 30; i++) {
+            word += ceasarChar(content.charAt(i), keyArray[i % keyArray.length]);
         }
         System.out.println(word);
     }
 
-    public static int frequencyCompareQuestion1() throws FileNotFoundException {
-            HashMap<Character, Double> hashmap = frequencyTess26();
-            HashMap<Character, Double> hashmap2 = frequencyCExercise1();
+    public static void question3() throws FileNotFoundException {
+        File file = new File("cexercise3.txt");
+        Scanner scanner = new Scanner(file);
+        String content = scanner.next();
+        String key = key();
+        String word = "";
+        char[] keyArray = new char[6];
 
-            double answer = 0;
-            double bestAnswer = 100;
+        for (int x = 0; x < 6; x++) {
+            keyArray[x] = (char) (key.charAt(x) - 'A');
+        }
 
-            char answerChar = 'A';
-            char bestChar = 'A';
-
-            for(int i = 0; i < 26; i++){
-                answer = absolute((double) hashmap.get('E') - (double) hashmap2.get((char)(i+65)));
-
-                if(answer < bestAnswer) {
-                    bestAnswer = answer;
-                    bestChar = (char) (i + 'A');
-                }
-            }
-            return bestChar - 'E';
+        for (int i = 0; i < 30; i++) {
+            word += ceasarChar(content.charAt(i), keyArray[i % keyArray.length]);
+        }
+        System.out.println(word);
     }
-    
+
+    public static String key() throws FileNotFoundException {
+        String key0 = Character.toString((char) (frequencyCompare(frequencyTess26(), frequencyExercise3(0))+65));
+        String key1 = Character.toString((char) (frequencyCompare(frequencyTess26(), frequencyExercise3(1))+65));
+        String key2 = Character.toString((char) (frequencyCompare(frequencyTess26(), frequencyExercise3(2))+65));
+        String key3 = Character.toString((char) (frequencyCompare(frequencyTess26(), frequencyExercise3(3))+65));
+        String key4 = Character.toString((char) (frequencyCompare(frequencyTess26(), frequencyExercise3(4))+65));
+        String key5 = Character.toString((char) (frequencyCompare(frequencyTess26(), frequencyExercise3(5))+65));
+
+        return key0 + key1 + key2 + key3 + key4 + key5;
+    }
+
+    public static int frequencyCompare(HashMap hashmap, HashMap hashmap2){
+        double error = 0;
+        double errorSum = 0;
+        double lowestError = 10000;
+        int lowestIndex = 0;
+
+        for(int i = 0; i < 26; i++){
+            errorSum = 0;
+            for(int x = 0; x < 26; x++){
+                error = (double) hashmap.get((char) ('A' + x)) - (double) hashmap2.get((char) ('A' + ((i + x) % 26)));
+                errorSum += absolute(error);
+            }
+            if(errorSum < lowestError){
+                lowestIndex = i;
+                lowestError = errorSum;
+            }
+        }
+        return lowestIndex;
+    }
+
+
+
+    public static HashMap frequencyExercise1() throws FileNotFoundException {
+        File file = new File("cexercise1.txt");
+        Scanner scanner = new Scanner(file);
+        HashMap<Character, Double> hashMap = new HashMap();
+        for (int i = 0; i < 26; i++) {
+            hashMap.put((char) (i + 'A'), 0.0);
+        }
+        String content = scanner.nextLine();
+        char letters;
+        for (int i = 0; i < content.length(); i++) {
+            letters = content.charAt(i);
+            if (hashMap.containsKey(letters)) {
+                hashMap.put(letters, hashMap.getOrDefault(letters, 0.0) + 1);
+            }
+        }
+        double sum = 0;
+        for (double f : hashMap.values()) {
+            sum += f;
+        }
+        for (int i = 0; i < 26; i++) {
+            hashMap.put((char) (i + 'A'), hashMap.getOrDefault((char) (i + 'A'), 0.0) / sum * 100);
+        }
+//        System.out.println(hashMap);
+        return hashMap;
+    }
+
+    public static HashMap frequencyExercise3(int characterPosition) throws FileNotFoundException {
+        File file = new File("cexercise3.txt");
+        Scanner scanner = new Scanner(file);
+        HashMap<Character, Double> hashMap = new HashMap();
+        for (int i = 0; i < 26; i++) {
+            hashMap.put((char) (i + 'A'), 0.0);
+        }
+        String content = scanner.nextLine();
+        String letter1 = "";
+        for (int i = 0; i < content.length(); i++) {
+            if (i % 6 == characterPosition) {
+                letter1 += (content.charAt((char) i));
+            }
+        }
+        char letters;
+        for (int i = 0; i < letter1.length(); i++) {
+            letters = letter1.charAt(i);
+            if (hashMap.containsKey(letters)) {
+                hashMap.put(letters, hashMap.getOrDefault(letters, 0.0) + 1);
+            }
+        }
+        double sum = 0;
+        for (double f : hashMap.values()) {
+            sum += f;
+        }
+        for (int i = 0; i < 26; i++) {
+            hashMap.put((char) (i + 'A'), hashMap.getOrDefault((char) (i + 'A'), 0.0) / sum * 100);
+        }
+//        System.out.println(hashMap);
+        return hashMap;
+    }
+
     public static HashMap frequencyTess26() throws FileNotFoundException {
         File file = new File("tess26.txt");
         Scanner scanner = new Scanner(file);
         HashMap<Character, Double> hashMap = new HashMap();
-        for(int i = 0; i < 26; i++){
-            hashMap.put((char) ( i +'A'), 0.0);
+        for (int i = 0; i < 26; i++) {
+            hashMap.put((char) (i + 'A'), 0.0);
         }
         String content = scanner.nextLine();
         char letters;
-        for(int i = 0; i < content.length(); i++){
+        for (int i = 0; i < content.length(); i++) {
             letters = content.charAt(i);
-            if(hashMap.containsKey(letters)){
-                hashMap.put(letters, hashMap.getOrDefault(letters, 0.0) +1);
+            if (hashMap.containsKey(letters)) {
+                hashMap.put(letters, hashMap.getOrDefault(letters, 0.0) + 1);
             }
         }
         double sum = 0;
-        for(double f : hashMap.values()){
+        for (double f : hashMap.values()) {
             sum += f;
         }
-        for(int i = 0; i < 26; i++){
-            hashMap.put((char) (i + 'A'), hashMap.getOrDefault((char) (i + 'A'), 0.0) /sum * 100);
+        for (int i = 0; i < 26; i++) {
+            hashMap.put((char) (i + 'A'), hashMap.getOrDefault((char) (i + 'A'), 0.0) / sum * 100);
         }
+//        System.out.println(hashMap);
         return hashMap;
     }
 
-    public static HashMap frequencyCExercise1() throws FileNotFoundException {
-        File file = new File("cexercise1.txt");
-        Scanner scanner = new Scanner(file);
-        HashMap<Character, Double> hashMap = new HashMap();
-        for(int i = 0; i < 26; i++){
-            hashMap.put((char) ( i +'A'), 0.0);
-        }
-        String content = scanner.nextLine();
-        char letters;
-        for(int i = 0; i < content.length(); i++){
-            letters = content.charAt(i);
-            if(hashMap.containsKey(letters)){
-                hashMap.put(letters, hashMap.getOrDefault(letters, 0.0) +1);
-            }
-        }
-        double sum = 0;
-        for(double f : hashMap.values()){
-            sum += f;
-        }
-        for(int i = 0; i < 26; i++){
-            hashMap.put((char) (i + 'A'), hashMap.getOrDefault((char) (i + 'A'), 0.0) /sum * 100);
-        }
-        return hashMap;
+    public static void main(String[] args) throws FileNotFoundException {
+        question1();
+        question2();
+        question3();
     }
 }
